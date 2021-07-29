@@ -70,9 +70,8 @@ Creates an object to compute the Jacobian with ForwardDiff.
 * `t1svarx::SubD`: Active (AD) view of `map` on `x`
 
 """
-struct Jacobian{Func, VI, VT, MT, SMT, VP, VD, SubT, SubD} <: AbstractJacobian
+struct Jacobian{Func, VI, VT, MT, SMT, VP, VD, SubT, SubD, JacT} <: AbstractJacobian
     func::Func
-    var::Union{State,Control}
     J::SMT
     compressedJ::MT
     coloring::VI

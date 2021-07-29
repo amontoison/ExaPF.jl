@@ -12,3 +12,27 @@ xones(S, n) = fill!(S(undef, n), one(eltype(S)))
 xnorm_inf(a) = maximum(abs.(a))
 
 default_sparse_matrix(::CPU) = SparseMatrixCSC
+
+function get_Jacobian_types(::CPU)
+    SMT = SparseMatrixCSC{Float64,Int}
+    A = Vector
+	return SMT, A
+end
+
+function get_Jacobian_types(::GPU)
+    SMT = CUSPARSE.CuSparseMatrixCSR{Float64}
+    A = CUDA.CuVector
+    return SMT, A
+end
+
+function get_BatchJacobian_types(::CPU)
+    SMT = SparseMatrixCSC{Float64,Int}
+    A = Array
+	return SMT, A
+end
+
+function get_BatchJacobian_types(::GPU)
+    SMT = CUSPARSE.CuSparseMatrixCSR{Float64}
+    A = CUDA.CuArray
+    return SMT, A
+end
