@@ -41,31 +41,29 @@ function runtests(datafile, device, AT)
     # Test printing
     println(devnull, polar)
 
-    @testset "PolarForm API" begin
-        test_polar_network_cache(polar, device, AT)
-        test_polar_api(polar, device, AT)
-        test_polar_constraints(polar, device, AT)
-    end
+    # @testset "PolarForm API" begin
+    #     test_polar_network_cache(polar, device, AT)
+    #     test_polar_api(polar, device, AT)
+    #     test_polar_constraints(polar, device, AT)
+    # end
 
-    @testset "PolarForm AutoDiff" begin
-        test_constraints_jacobian(polar, device, AT)
-        test_constraints_adjoint(polar, device, AT)
-    end
+    # @testset "PolarForm AutoDiff" begin
+        # test_constraints_jacobian(polar, device, AT)
+        # test_constraints_adjoint(polar, device, AT)
+    # end
 
-    @testset "PolarForm Gradient" begin
-        test_reduced_gradient(polar, device, AT)
-        test_line_flow_gradient(polar, device, AT)
-    end
+    # @testset "PolarForm Gradient" begin
+    #     test_reduced_gradient(polar, device, AT)
+    #     test_line_flow_gradient(polar, device, AT)
+    # end
 
-    @testset "PolarForm Hessians" begin
         test_hessian_with_matpower(polar, device, AT)
         test_hessian_with_finitediff(polar, device, AT)
-    end
 
-    @testset "Batch algorithms" begin
-        test_batch_powerflow(polar, device, AT)
-        test_batch_hessian(polar, device, AT)
-    end
+    # @testset "Batch algorithms" begin
+    #     test_batch_powerflow(polar, device, AT)
+    #     test_batch_hessian(polar, device, AT)
+    # end
 end
 
 end

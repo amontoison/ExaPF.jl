@@ -259,14 +259,38 @@ function AutoDiff.adj_hessian_prod!(
     _init_seed_hessian!(H.t1sseeds, H.host_t1sseeds, v, nmap)
     AutoDiff.seed!(H.t1sseeds, H.varx, H.t1svarx, polar.device)
 
-    adjoint!(
-        polar, H.buffer,
-        t1sF, adj_t1sF,
-        view(t1sx, 1:nbus), view(adj_t1sx, 1:nbus),                   # vmag
-        view(t1sx, nbus+1:2*nbus), view(adj_t1sx, nbus+1:2*nbus),     # vang
-        view(t1sx, 2*nbus+1:3*nbus), view(adj_t1sx, 2*nbus+1:3*nbus), # pnet
+    # adjoint!(
+    #     polar, H.buffer,
+    #     t1sF, adj_t1sF,
+    #     view(t1sx, 1:nbus), view(adj_t1sx, 1:nbus),                   # vmag
+    #     view(t1sx, nbus+1:2*nbus), view(adj_t1sx, nbus+1:2*nbus),     # vang
+    #     view(t1sx, 2*nbus+1:3*nbus), view(adj_t1sx, 2*nbus+1:3*nbus), # pnet
+    #     buffer.pload, buffer.qload,
+    # )
+
+    nbus = get(polar, PS.NumberOfBuses())
+    ref, pv, pq = index_buses_device(polar)
+    ybus_re, ybus_im = get(polar.topology, PS.BusAdmittanceMatrix())
+    transposeperm = polar.topology.sortperm
+    fill!(t1sF, 0.0)
+    autodiff(_power_balance!, 
+        Duplicated(t1sF, adj_t1sF),
+        Duplicated(view(t1sx, 1:nbus), view(adj_t1sx, 1:nbus)),                   # vmag
+        Duplicated(view(t1sx, nbus+1:2*nbus), view(adj_t1sx, nbus+1:2*nbus)),     # vang
+        Duplicated(view(t1sx, 2*nbus+1:3*nbus), view(adj_t1sx, 2*nbus+1:3*nbus)), # pnet
         buffer.pload, buffer.qload,
+        ybus_re, ybus_im, transposeperm,
+        pv, pq, ref, nbus, polar.device
     )
+    # autodiff(power_balance, 
+    #     polar,
+    #     Duplicated(t1sF, adj_t1sF),
+    #     Duplicated(view(t1sx, 1:nbus), view(adj_t1sx, 1:nbus)),                   # vmag
+    #     Duplicated(view(t1sx, nbus+1:2*nbus), view(adj_t1sx, nbus+1:2*nbus)),     # vang
+    #     Duplicated(view(t1sx, 2*nbus+1:3*nbus), view(adj_t1sx, 2*nbus+1:3*nbus)), # pnet
+    #     t1sx[2*nbus+1:3*nbus],
+    #     buffer.pload, buffer.qload
+    # )
 
     AutoDiff.getpartials_kernel!(hv, adj_t1sx, H.map, polar.device)
     return nothing

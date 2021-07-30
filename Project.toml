@@ -5,6 +5,8 @@ version = "0.5.0"
 
 [deps]
 CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
+Enzyme = "7da242da-08ed-463a-9acd-ee780be4f1d9"
+Enzyme_jll = "7cc45869-7501-5eee-bdea-0790c847d4ef"
 ExprTools = "e2ba6199-217a-4e67-a87a-7c52f15ade04"
 FiniteDiff = "6a86dc24-6348-571c-b903-95158fe2bd41"
 ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"

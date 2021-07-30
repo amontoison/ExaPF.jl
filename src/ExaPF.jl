@@ -14,6 +14,7 @@ import ForwardDiff
 using KernelAbstractions
 const KA = KernelAbstractions
 using TimerOutputs: @timeit, TimerOutput
+using Enzyme
 
 import Base: show, get
 
