@@ -33,37 +33,45 @@ the network, in polar formulation. Attributes are:
 
 """
 struct PolarNetworkState{VI,VT} <: AbstractNetworkBuffer
-    vmag::VT
-    vang::VT
+    vmag::UnitRange
+    vang::UnitRange
     pnet::VT
     qnet::VT
-    pgen::VT
-    qgen::VT
-    pload::VT
-    qload::VT
+    pgen::UnitRange
+    qgen::UnitRange
+    pload::UnitRange
+    qload::UnitRange
     balance::VT
+    x::VT
     dx::VT
     bus_gen::VI   # Generator-Bus incidence matrix
 end
 
-setvalues!(buf::PolarNetworkState, ::PS.VoltageMagnitude, values) = copyto!(buf.vmag, values)
-setvalues!(buf::PolarNetworkState, ::PS.VoltageAngle, values) = copyto!(buf.vang, values)
+setvalues!(buf::PolarNetworkState, ::PS.VoltageMagnitude, values) = copyto!(buf.x, buf.vmag, values)
+setvalues!(buf::PolarNetworkState, ::PS.VoltageAngle, values) = copyto!(buf.x, buf.vang, values)
 function setvalues!(buf::PolarNetworkState, ::PS.ActivePower, values)
     pgenbus = view(buf.pnet, buf.bus_gen)
     pgenbus .= values
-    copyto!(buf.pgen, values)
+    copyto!(buf.x, buf.pgen, values)
 end
 function setvalues!(buf::PolarNetworkState, ::PS.ReactivePower, values)
     qgenbus = view(buf.qnet, buf.bus_gen)
     qgenbus .= values
-    copyto!(buf.qgen, values)
+    copyto!(buf.x, buf.qgen, values)
 end
 function setvalues!(buf::PolarNetworkState, ::PS.ActiveLoad, values)
-    copyto!(buf.pload, values)
+    copyto!(buf.x, buf.pload, values)
 end
 function setvalues!(buf::PolarNetworkState, ::PS.ReactiveLoad, values)
-    copyto!(buf.qload, values)
+    copyto!(buf.x, buf.qload, values)
 end
+
+getvalues(buf::PolarNetworkState, ::PS.VoltageMagnitude) = view(buf.x, buf.vmag)
+getvalues(buf::PolarNetworkState, ::PS.VoltageAngle) = view(buf.x, buf.vang)
+getvalues(buf::PolarNetworkState, ::PS.ActivePower) = view(buf.x, buf.pgen)
+getvalues(buf::PolarNetworkState, ::PS.ReactivePower) = view(buf.x, buf.qgen)
+getvalues(buf::PolarNetworkState, ::PS.ActiveLoad) = view(buf.x, buf.pload)
+getvalues(buf::PolarNetworkState, ::PS.ReactiveLoad) = view(buf.x, buf.qload)
 
 function Base.iszero(buf::PolarNetworkState)
     return iszero(buf.pnet) &&
