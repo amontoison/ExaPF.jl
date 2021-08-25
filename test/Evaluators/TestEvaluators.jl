@@ -4,6 +4,7 @@ module TestEvaluators
 
 using Test
 
+using CUDA
 using FiniteDiff
 using LinearAlgebra
 using Random

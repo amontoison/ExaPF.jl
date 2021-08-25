@@ -105,7 +105,7 @@ function _transfer_sparse!(J_dest::SparseMatrixCSC, J_src::SparseMatrixCSC, shif
 end
 
 function _transfer_sparse!(J_dest::CUSPARSE.CuSparseMatrixCSR, J_src::CUSPARSE.CuSparseMatrixCSR, shift)
-    nnz_start = J_dest.rowPtr[shift+1]
+    CUDA.@allowscalar global nnz_start = J_dest.rowPtr[shift+1]
     nnz_ = nnz(J_src)
     Jnnz = @view J_dest.nzVal[nnz_start:nnz_start+nnz_-1]
     Jnnz .= J_src.nzVal

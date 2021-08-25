@@ -18,7 +18,8 @@ const INSTANCES_DIR = joinpath(dirname(@__FILE__), "..", "data")
 const BENCHMARK_DIR = joinpath(dirname(@__FILE__), "..", "benchmark")
 const CASES = ["case9.m", "case30.m"]
 
-ARCHS = Any[(CPU(), Array, SparseMatrixCSC)]
+# ARCHS = Any[(CPU(), Array, SparseMatrixCSC)]
+ARCHS = []
 has_cuda_gpu() && push!(ARCHS, (CUDADevice(), CuArray, CuSparseMatrixCSR))
 
 # Load test modules

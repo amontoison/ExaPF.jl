@@ -164,10 +164,11 @@ function hessian_prod_objective!(
 
     ∇pgₓ = ∇f.∇fₓ
     ∇pgᵤ = ∇f.∇fᵤ
-
-    scale_x = dot(∇pgₓ, ∂²f[ref2gen[1]], tx)
-    scale_u = dot(∇pgᵤ, ∂²f[ref2gen[1]], tu)
-    α = scale_x + scale_u
+    CUDA.allowscalar() do
+        scale_x = dot(∇pgₓ, ∂²f[ref2gen[1]], tx)
+        scale_u = dot(∇pgᵤ, ∂²f[ref2gen[1]], tu)
+        global α = scale_x + scale_u
+    end
     # Contribution of slack node
     axpy!(α, ∇pgₓ, hvx)
     axpy!(α, ∇pgᵤ, hvu)
@@ -243,8 +244,10 @@ function hessian_prod_objective_proxal!(
     @views begin
         tpg = tgt[nx+nu-npv+1:end]
 
-        scale_x = dot(∇pgₓ, ∂²f[ref2gen[1]], tx)
-        scale_u = dot(∇pgᵤ, ∂²f[ref2gen[1]], tu)
+        CUDA.allowscalar() do
+            global scale_x = dot(∇pgₓ, ∂²f[ref2gen[1]], tx)
+            global scale_u = dot(∇pgᵤ, ∂²f[ref2gen[1]], tu)
+        end
         # Contribution of slack node
         hv_xu[1:nx]       .+= (scale_x + scale_u) .* ∇pgₓ
         hv_xu[1+nx:nx+nu] .+= (scale_x + scale_u) .* ∇pgᵤ

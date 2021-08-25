@@ -50,8 +50,8 @@ function PolarForm(pf::PS.PowerNetwork, device::KA.Device)
         M = SparseMatrixCSC
         AT = Array
     elseif isa(device, KA.GPU)
-        IT = CUDA.CuVector{Int64}
-        VT = CUDA.CuVector{Float64}
+        IT = CUDA.CuArray{Int64, 1, CUDA.Mem.DeviceBuffer}
+        VT = CUDA.CuArray{Float64, 1, CUDA.Mem.DeviceBuffer}
         M = CUSPARSE.CuSparseMatrixCSR
         AT = CUDA.CuArray
     end
@@ -110,7 +110,6 @@ function PolarForm(pf::PS.PowerNetwork, device::KA.Device)
     ## Bounds on p_pv
     u_min[nref+npv+1:nref+2*npv] .= p_min[gpv_to_gen]
     u_max[nref+npv+1:nref+2*npv] .= p_max[gpv_to_gen]
-
     indexing = IndexingCache(gidx_pv, gidx_pq, gidx_ref, gidx_gen, gpv_to_gen, gref_to_gen)
     mappv = [i + nbus for i in idx_pv]
     mappq = [i + nbus for i in idx_pq]
