@@ -134,9 +134,9 @@ function LinearAlgebra.mul!(
     n, m = size(A)
     @assert size(Y, 1) == n
     @assert size(X, 1) == m
-
     N = ForwardDiff.npartials(Y)
     p = 1 + N
+    println("Hello1")
 
     # Reinterpret duals as double.
     Ys = reshape(reinterpret(Float64, Y), p, n)
@@ -144,6 +144,41 @@ function LinearAlgebra.mul!(
 
     ndrange = (n, p)
     ev = _spmv_csr_kernel!(CUDADevice())(
+        Ys, Xs, A.colVal, A.rowPtr, A.nzVal, alpha, beta, n, m,
+        ndrange=ndrange, dependencies=Event(CUDADevice()),
+    )
+    wait(ev)
+end
+
+@kernel function _spmv_csr_kernel2!(Y, X, colVal, rowPtr, nzVal, alpha, beta, n, m)
+    i, k, c = @index(Global, Cartesian)
+    sum = Y[k,i] * beta
+    @inbounds for c in rowPtr[i]:rowPtr[i+1]-1
+        j = colVal[c]
+        sum += alpha * nzVal[c] * X[k, j]
+    end
+    Y[k,i] = sum
+end
+
+function mul2!(
+    Y::CuArray{ForwardDiff.Dual{Nothing, T, N}, 1},
+    A::CUSPARSE.CuSparseMatrixCSR,
+    X::CuArray{ForwardDiff.Dual{Nothing, T, N}, 1},
+    alpha::Number, beta::Number,
+    maxdist
+) where {T, N}
+    n, m = size(A)
+    @assert size(Y, 1) == n
+    @assert size(X, 1) == m
+    println("Hello3")
+
+    # Reinterpret duals as double.
+    Ys = reshape(reinterpret(Float64, Y), N+1, n)
+    Xs = reshape(reinterpret(Float64, X), N+1, m)
+
+    ndrange = (n, N+1)
+    @show typeof(Ys)
+    ev = _spmv_csr_kernel2!(CUDADevice(), maxdist, )(
         Ys, Xs, A.colVal, A.rowPtr, A.nzVal, alpha, beta, n, m,
         ndrange=ndrange, dependencies=Event(CUDADevice()),
     )
